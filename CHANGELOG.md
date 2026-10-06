@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Stack overflow when parsing deeply nested elements.
   Element content is now parsed iteratively instead of recursing once per nesting level.
+- Reject an element with more than `u16::MAX` attributes. Duplicate-attribute
+  checks are quadratic, and the previous document-wide `u32` cap did not bound
+  a single element.
 
 ## [0.21.1] - 2025-10-09
 ### Fixed
