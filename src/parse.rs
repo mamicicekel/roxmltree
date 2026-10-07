@@ -1,9 +1,9 @@
-use alloc::borrow::Cow;
 use alloc::string::{String, ToString};
 use alloc::{vec, vec::Vec};
-use core::fmt;
-use core::mem::take;
+use alloc::borrow::Cow;
 use core::ops::Range;
+use core::mem::take;
+use core::fmt;
 use memchr::{memchr, memchr2, memchr_iter};
 
 use crate::{
@@ -600,7 +600,11 @@ impl<'input> Context<'input> {
         Ok(new_child_id)
     }
 
-    fn append_text(&mut self, text: Cow<'input, str>, range: Range<usize>) -> Result<()> {
+    fn append_text(
+        &mut self,
+        text: Cow<'input, str>,
+        range: Range<usize>,
+    ) -> Result<()> {
         if self.after_text.is_empty() {
             let text = match &text {
                 Cow::Borrowed(text) => StringStorage::Borrowed(text),
@@ -754,16 +758,13 @@ impl<'input> tokenizer::XmlEvents<'input> for Context<'input> {
         Ok(())
     }
 
-    fn resolve_entity(
-        &mut self,
-        pub_id: Option<&str>,
-        uri: &str,
-    ) -> core::result::Result<Option<&'input str>, String> {
+    fn resolve_entity(&mut self, pub_id: Option<&str>, uri: &str) -> core::result::Result<Option<&'input str>, String> {
         match &mut self.opt.entity_resolver {
             Some(entity_resolver) => entity_resolver(pub_id, uri),
             None => Ok(None),
         }
     }
+
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1194,9 +1195,7 @@ fn normalize_attribute<'input>(
 ) -> Result<StringStorage<'input>> {
     // We assume that `&` indicates an entity or a character reference.
     // But in rare cases it can be just an another character.
-    if memchr2(b'&', b'\t', text.as_str().as_bytes()).is_some()
-        || memchr2(b'\n', b'\r', text.as_str().as_bytes()).is_some()
-    {
+    if memchr2(b'&', b'\t', text.as_str().as_bytes()).is_some() || memchr2(b'\n', b'\r', text.as_str().as_bytes()).is_some() {
         let mut text_buffer = TextBuffer::new();
         _normalize_attribute(text, &mut text_buffer, ctx)?;
         Ok(StringStorage::new_owned(&text_buffer.finish()))
