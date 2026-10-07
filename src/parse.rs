@@ -1,9 +1,9 @@
+use alloc::borrow::Cow;
 use alloc::string::{String, ToString};
 use alloc::{vec, vec::Vec};
-use alloc::borrow::Cow;
-use core::ops::Range;
-use core::mem::take;
 use core::fmt;
+use core::mem::take;
+use core::ops::Range;
 use memchr::{memchr, memchr2, memchr_iter};
 
 use crate::{
@@ -600,11 +600,7 @@ impl<'input> Context<'input> {
         Ok(new_child_id)
     }
 
-    fn append_text(
-        &mut self,
-        text: Cow<'input, str>,
-        range: Range<usize>,
-    ) -> Result<()> {
+    fn append_text(&mut self, text: Cow<'input, str>, range: Range<usize>) -> Result<()> {
         if self.after_text.is_empty() {
             let text = match &text {
                 Cow::Borrowed(text) => StringStorage::Borrowed(text),
@@ -758,13 +754,16 @@ impl<'input> tokenizer::XmlEvents<'input> for Context<'input> {
         Ok(())
     }
 
-    fn resolve_entity(&mut self, pub_id: Option<&str>, uri: &str) -> core::result::Result<Option<&'input str>, String> {
+    fn resolve_entity(
+        &mut self,
+        pub_id: Option<&str>,
+        uri: &str,
+    ) -> core::result::Result<Option<&'input str>, String> {
         match &mut self.opt.entity_resolver {
             Some(entity_resolver) => entity_resolver(pub_id, uri),
             None => Ok(None),
         }
     }
-
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -992,10 +991,9 @@ fn resolve_attributes(namespaces: ShortRange, ctx: &mut Context) -> Result<Short
     // Duplicate-attribute checks are O(n²) in the current element's
     // attributes. Cap one element at u16::MAX so a huge attribute list
     // cannot turn into a parse DoS. The document-wide list still uses u32.
-    if ctx.current_attributes.len() > u16::MAX as usize {
-        return Err(Error::AttributesLimitReached);
-    }
-    if ctx.doc.attributes.len() + ctx.current_attributes.len() >= u32::MAX as usize {
+    if ctx.current_attributes.len() > u16::MAX as usize
+        || ctx.doc.attributes.len() + ctx.current_attributes.len() >= u32::MAX as usize
+    {
         return Err(Error::AttributesLimitReached);
     }
 
@@ -1196,7 +1194,9 @@ fn normalize_attribute<'input>(
 ) -> Result<StringStorage<'input>> {
     // We assume that `&` indicates an entity or a character reference.
     // But in rare cases it can be just an another character.
-    if memchr2(b'&', b'\t', text.as_str().as_bytes()).is_some() || memchr2(b'\n', b'\r', text.as_str().as_bytes()).is_some() {
+    if memchr2(b'&', b'\t', text.as_str().as_bytes()).is_some()
+        || memchr2(b'\n', b'\r', text.as_str().as_bytes()).is_some()
+    {
         let mut text_buffer = TextBuffer::new();
         _normalize_attribute(text, &mut text_buffer, ctx)?;
         Ok(StringStorage::new_owned(&text_buffer.finish()))

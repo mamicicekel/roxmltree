@@ -63,7 +63,12 @@ fn api_01() {
     let doc = Document::parse(data).unwrap();
     let p = doc.root_element();
 
-    assert_eq!(p.attributes().find(|a| a.namespace().is_none() && a.name() == "attr").map(|a| a.value()), Some("no_ns"));
+    assert_eq!(
+        p.attributes()
+            .find(|a| a.namespace().is_none() && a.name() == "attr")
+            .map(|a| a.value()),
+        Some("no_ns")
+    );
     assert_eq!(p.has_attribute("attr"), true);
 
     assert_eq!(p.attribute(("http://www.w3.org", "attr")), Some("a_ns"));
@@ -84,7 +89,10 @@ fn api_01() {
 
 #[test]
 fn has_local_name() {
-    let doc = Document::parse(r#"<root xmlns:foo="http://example.com/foo"><foo:bar foo:baz="qux"/></root>"#).unwrap();
+    let doc = Document::parse(
+        r#"<root xmlns:foo="http://example.com/foo"><foo:bar foo:baz="qux"/></root>"#,
+    )
+    .unwrap();
 
     let node = doc.descendants().next_back().unwrap();
 
@@ -170,9 +178,15 @@ fn text_pos_01() {
 
     assert_eq!(doc.text_pos_at(attr.range().start), TextPos::new(1, 4));
     assert_eq!(doc.text_pos_at(attr.range().end), TextPos::new(1, 9));
-    assert_eq!(doc.text_pos_at(attr.range_qname().start), TextPos::new(1, 4));
+    assert_eq!(
+        doc.text_pos_at(attr.range_qname().start),
+        TextPos::new(1, 4)
+    );
     assert_eq!(doc.text_pos_at(attr.range_qname().end), TextPos::new(1, 5));
-    assert_eq!(doc.text_pos_at(attr.range_value().start), TextPos::new(1, 7));
+    assert_eq!(
+        doc.text_pos_at(attr.range_value().start),
+        TextPos::new(1, 7)
+    );
     assert_eq!(doc.text_pos_at(attr.range_value().end), TextPos::new(1, 8));
 
     // first child is a text/whitespace, not a comment
@@ -199,9 +213,15 @@ fn text_pos_02() {
 
     assert_eq!(doc.text_pos_at(attr.range().start), TextPos::new(1, 36));
     assert_eq!(doc.text_pos_at(attr.range().end), TextPos::new(1, 44));
-    assert_eq!(doc.text_pos_at(attr.range_qname().start), TextPos::new(1, 36));
+    assert_eq!(
+        doc.text_pos_at(attr.range_qname().start),
+        TextPos::new(1, 36)
+    );
     assert_eq!(doc.text_pos_at(attr.range_qname().end), TextPos::new(1, 40));
-    assert_eq!(doc.text_pos_at(attr.range_value().start), TextPos::new(1, 42));
+    assert_eq!(
+        doc.text_pos_at(attr.range_value().start),
+        TextPos::new(1, 42)
+    );
     assert_eq!(doc.text_pos_at(attr.range_value().end), TextPos::new(1, 43));
 }
 
@@ -231,9 +251,15 @@ fn text_pos_04() {
 
     assert_eq!(doc.text_pos_at(attr.range().start), TextPos::new(1, 36));
     assert_eq!(doc.text_pos_at(attr.range().end), TextPos::new(1, 43));
-    assert_eq!(doc.text_pos_at(attr.range_qname().start), TextPos::new(1, 36));
+    assert_eq!(
+        doc.text_pos_at(attr.range_qname().start),
+        TextPos::new(1, 36)
+    );
     assert_eq!(doc.text_pos_at(attr.range_qname().end), TextPos::new(1, 40));
-    assert_eq!(doc.text_pos_at(attr.range_value().start), TextPos::new(1, 42));
+    assert_eq!(
+        doc.text_pos_at(attr.range_value().start),
+        TextPos::new(1, 42)
+    );
     assert_eq!(doc.text_pos_at(attr.range_value().end), TextPos::new(1, 42));
 }
 
@@ -248,9 +274,15 @@ fn text_pos_05() {
 
     assert_eq!(doc.text_pos_at(attr.range().start), TextPos::new(1, 36));
     assert_eq!(doc.text_pos_at(attr.range().end), TextPos::new(1, 49));
-    assert_eq!(doc.text_pos_at(attr.range_qname().start), TextPos::new(1, 36));
+    assert_eq!(
+        doc.text_pos_at(attr.range_qname().start),
+        TextPos::new(1, 36)
+    );
     assert_eq!(doc.text_pos_at(attr.range_qname().end), TextPos::new(1, 40));
-    assert_eq!(doc.text_pos_at(attr.range_value().start), TextPos::new(1, 47));
+    assert_eq!(
+        doc.text_pos_at(attr.range_value().start),
+        TextPos::new(1, 47)
+    );
     assert_eq!(doc.text_pos_at(attr.range_value().end), TextPos::new(1, 48));
 }
 
@@ -266,7 +298,10 @@ fn text_pos_06() {
 
     assert_eq!(doc.text_pos_at(attr.range().start), TextPos::new(1, 4));
     assert_eq!(doc.text_pos_at(attr.range().end), TextPos::new(1, 269));
-    assert_eq!(doc.text_pos_at(attr.range_qname().start), TextPos::new(1, 4));
+    assert_eq!(
+        doc.text_pos_at(attr.range_qname().start),
+        TextPos::new(1, 4)
+    );
     assert_eq!(doc.text_pos_at(attr.range_qname().end), TextPos::new(1, 5));
     attr.range_value(); // unreliable since >254 spaces around equal sign, but still shouldn't panic
 }
@@ -370,8 +405,7 @@ fn entity_resolver_works() {
 
     let entity = r#"<?xml version="1.0"?><foobar/>"#.to_owned();
 
-    let entity_resolver =
-        |_pub_id: Option<&str>, _uri: &str| Ok(Some(&*entity));
+    let entity_resolver = |_pub_id: Option<&str>, _uri: &str| Ok(Some(&*entity));
 
     let opts = roxmltree::ParsingOptions {
         allow_dtd: true,
@@ -381,13 +415,12 @@ fn entity_resolver_works() {
 
     let doc = roxmltree::Document::parse_with_options(&text, opts).unwrap();
 
-    assert!(
-        doc.root_element()
-            .children()
-            .next()
-            .unwrap()
-            .has_tag_name("foobar")
-    );
+    assert!(doc
+        .root_element()
+        .children()
+        .next()
+        .unwrap()
+        .has_tag_name("foobar"));
 }
 
 #[test]
@@ -406,5 +439,5 @@ fn too_many_attributes_on_one_element() {
     }
     text.push_str("/>");
     let err = Document::parse(&text).unwrap_err();
-    assert_eq!(err.to_string(), "too many attributes were parsed");
+    assert_eq!(err, Error::AttributesLimitReached);
 }
